@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skynet Study | ITOM 6216 Course Assistant</title>
+<meta name="description" content="Skynet answers questions about ITOM 6216 Generative AI for Business using the course guide and Lectures 1 to 5.">
+<style>
+/* ========== 1. DESIGN TOKENS (colors, fonts, spacing) ========== */
+:root{
+  --bg:#060912; --bg-2:#0c1222; --panel:#111a2e; --line:#1f2b45;
+  --text:#e8eefc; --muted:#93a1c0;
+  --cyan:#3ee0ff; --red:#ff3d5a; --gold:#ffc857;
+  --radius:18px;
+  --font:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  --mono:"Cascadia Code",Consolas,"SFMono-Regular",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--cyan)}
+img,video{max-width:100%;display:block}
+.wrap{width:min(1120px,92%);margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+h1,h2,h3{line-height:1.15;letter-spacing:-.01em}
+h2{font-size:clamp(1.8rem,4vw,2.6rem);margin:.4rem 0 1rem}
+.lead{color:var(--muted);font-size:1.1rem;max-width:62ch}
+section{padding:96px 0}
+
+/* ========== 2. TOP NAVIGATION ========== */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(6,9,18,.85);backdrop-filter:blur(10px);border-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--text);text-decoration:none;font-size:1.1rem}
+.logo-dot{width:14px;height:14px;border-radius:50%;background:var(--red);box-shadow:0 0 14px var(--red),0 0 30px rgba(255,61,90,.5);animation:pulse 2.4s infinite}
+@keyframes pulse{50%{transform:scale(.75);opacity:.7}}
+.nav-links{display:flex;gap:1.6rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.95rem}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+@media (max-width:640px){.nav-links a.hide-sm{display:none}}
+
+/* ========== 3. BUTTONS ========== */
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.9rem 1.5rem;border-radius:999px;font-weight:600;font-size:1rem;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s;font-family:inherit}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--cyan);color:#04121a;box-shadow:0 8px 30px rgba(62,224,255,.35)}
+.btn-primary:hover{box-shadow:0 10px 40px rgba(62,224,255,.55)}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--text);border-color:rgba(255,255,255,.18)}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-sm{padding:.55rem 1rem;font-size:.9rem}
+
+/* ========== 4. HERO WITH AUTOPLAY VIDEO ========== */
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:120px 0 80px;overflow:hidden}
+.hero-media{position:absolute;inset:0;z-index:0}
+.hero-media video{width:100%;height:100%;object-fit:cover}
+/* Fallback animation shown only if hero.mp4 is missing */
+.hero-fallback{position:absolute;inset:0;display:none;
+  background:radial-gradient(60% 60% at 70% 30%,rgba(62,224,255,.25),transparent 60%),
+             radial-gradient(50% 50% at 20% 80%,rgba(255,61,90,.22),transparent 60%),var(--bg);
+  animation:drift 10s ease-in-out infinite alternate}
+.hero-fallback::after{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(rgba(62,224,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(62,224,255,.08) 1px,transparent 1px);
+  background-size:48px 48px;mask-image:radial-gradient(circle at center,#000 30%,transparent 75%)}
+@keyframes drift{to{background-position:30% 10%,60% 90%,0 0;filter:hue-rotate(25deg)}}
+.hero.no-video .hero-fallback{display:block}
+.hero.no-video video{display:none}
+.hero-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,9,18,.55) 0%,rgba(6,9,18,.35) 40%,rgba(6,9,18,.95) 100%),linear-gradient(90deg,rgba(6,9,18,.85) 0%,rgba(6,9,18,.1) 70%)}
+.hero-content{position:relative;z-index:2}
+.hero h1{font-size:clamp(2.6rem,7.5vw,5.4rem);font-weight:800;max-width:14ch;margin:.8rem 0 1.2rem}
+.hero h1 .glow{color:var(--cyan);text-shadow:0 0 30px rgba(62,224,255,.5)}
+.hero .lead{color:#c5d0ea;font-size:clamp(1.05rem,2vw,1.25rem)}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2rem}
+.status{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .8rem;border:1px solid rgba(62,224,255,.35);border-radius:999px;background:rgba(62,224,255,.08)}
+.status i{width:8px;height:8px;border-radius:50%;background:#3dff9a;box-shadow:0 0 10px #3dff9a}
+.scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:2;color:var(--muted);font-size:.8rem;font-family:var(--mono);text-align:center;animation:bob 2s infinite}
+@keyframes bob{50%{transform:translate(-50%,6px)}}
+
+/* ========== 5. STATS STRIP ========== */
+.stats{padding:0;margin-top:-1px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-2)}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:28px 12px;text-align:center;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-size:2rem;color:var(--text);font-family:var(--mono)}
+.stat span{color:var(--muted);font-size:.9rem}
+@media (max-width:720px){.stats .wrap{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+
+/* ========== 6. "ASK SKYNET" PROMPT CARDS ========== */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:2.5rem}
+@media (max-width:860px){.grid-3{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:var(--radius);padding:28px;transition:border-color .2s,transform .2s}
+.card:hover{border-color:rgba(62,224,255,.5);transform:translateY(-4px)}
+.card .tag{font-family:var(--mono);font-size:.75rem;color:var(--gold)}
+.card h3{font-size:1.15rem;margin:.6rem 0 .8rem}
+.card p{color:var(--muted);font-size:.95rem}
+.prompt-q{font-family:var(--mono);font-size:.88rem;color:var(--text);background:rgba(62,224,255,.07);border-left:3px solid var(--cyan);padding:.8rem;border-radius:8px;margin-top:1rem}
+
+/* ========== 7. FLASHCARDS (X-FACTOR) ========== */
+.fc-section{background:radial-gradient(70% 60% at 50% 0%,rgba(62,224,255,.10),transparent 70%),var(--bg)}
+.fc-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:1rem}
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:2rem 0 1.2rem}
+.tab{font-family:var(--mono);font-size:.85rem;padding:.5rem .95rem;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--cyan);color:#04121a;border-color:var(--cyan)}
+.progress{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;color:var(--muted);font-size:.9rem}
+.bar{flex:1;height:8px;background:var(--panel);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),#3dff9a);transition:width .4s}
+.fc-stage{perspective:1400px;max-width:760px;margin:0 auto}
+.fc{position:relative;height:300px;cursor:pointer;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.8,.2,1);outline:none}
+.fc.flipped{transform:rotateY(180deg)}
+.fc:focus-visible .fc-face{box-shadow:0 0 0 3px var(--cyan)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:34px;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--line)}
+.fc-front{background:linear-gradient(145deg,#13203b,#0b1222)}
+.fc-back{background:linear-gradient(145deg,#0e2a33,#0b1a22);transform:rotateY(180deg);border-color:rgba(62,224,255,.4)}
+.fc-meta{position:absolute;top:18px;left:24px;right:24px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.fc-meta .known{color:#3dff9a}
+.fc-face h3{font-size:clamp(1.2rem,2.6vw,1.6rem)}
+.fc-face p{color:#d4e2f5;font-size:clamp(.98rem,2vw,1.1rem)}
+.fc-hint{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:.8rem;color:var(--muted)}
+.fc-controls{display:flex;flex-wrap:wrap;justify-content:center;gap:.7rem;margin-top:1.6rem}
+.btn-ok{background:rgba(61,255,154,.12);color:#3dff9a;border-color:rgba(61,255,154,.4)}
+.btn-again{background:rgba(255,200,87,.1);color:var(--gold);border-color:rgba(255,200,87,.4)}
+@media (max-width:560px){.fc{height:340px}.fc-face{padding:26px 22px}}
+
+/* ========== 8. PAGE-2 TEASER BAND ========== */
+.cta-band{border:1px solid var(--line);border-radius:28px;padding:56px clamp(24px,5vw,64px);background:linear-gradient(120deg,rgba(255,61,90,.16),rgba(62,224,255,.12));display:flex;flex-wrap:wrap;gap:2rem;align-items:center;justify-content:space-between}
+.cta-band h2{margin:0 0 .5rem}
+
+/* ========== 9. FOOTER + X-FACTOR NOTE ========== */
+footer{border-top:1px solid var(--line);padding:48px 0 120px;color:var(--muted);font-size:.9rem}
+.xfactor{border:1px dashed rgba(255,200,87,.5);border-radius:14px;padding:18px 20px;margin-bottom:24px;color:#e9dcc0;max-width:720px}
+.xfactor b{color:var(--gold)}
+
+/* ========== 10. SKYNET CHAT WIDGET ========== */
+.chat-fab{position:fixed;right:22px;bottom:22px;z-index:90;display:flex;align-items:center;gap:.6rem;padding:.85rem 1.2rem .85rem .9rem;border-radius:999px;border:1px solid rgba(62,224,255,.5);background:#0b1a2a;color:var(--text);font:600 .95rem var(--font);cursor:pointer;box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 24px rgba(62,224,255,.25)}
+.chat-fab .eye{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,var(--red) 0 30%,#5a0d1a 31% 60%,#1b0509 61%);box-shadow:0 0 16px var(--red)}
+.chat-panel{position:fixed;right:22px;bottom:92px;z-index:95;width:min(400px,calc(100vw - 32px));height:min(620px,calc(100svh - 120px));background:var(--bg-2);border:1px solid rgba(62,224,255,.4);border-radius:20px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.chat-panel.open{display:flex;animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}}
+.chat-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.chat-top b{display:block}
+.chat-top small{color:var(--muted);font-size:.78rem}
+.chat-close{background:none;border:0;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1;padding:4px 8px}
+.chat-panel iframe{flex:1;width:100%;border:0;background:#fff}
+.chat-foot{padding:8px 14px;font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);text-align:center}
+@media (max-width:560px){
+  .chat-panel{right:0;bottom:0;width:100vw;height:100svh;border-radius:0}
+  .chat-fab{right:14px;bottom:14px}
+  .chat-fab .label{display:none}
+  .chat-fab{padding:.7rem}
+}
+
+/* ========== 11. SCROLL REVEAL ========== */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.fc{transition:none}}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a href="index.html" class="logo"><span class="logo-dot"></span>Skynet Study</a>
+    <nav class="nav-links">
+      <a href="#ask" class="hide-sm">What to ask</a>
+      <a href="#flashcards" class="hide-sm">Flashcards</a>
+      <a href="about.html">How it works</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== HERO: AI VIDEO, AUTOPLAY + LOOP ===== -->
+<section class="hero" id="hero">
+  <div class="hero-media">
+    <!-- Put your AI-generated video in the same folder and name it hero.mp4 -->
+    <video id="heroVideo" autoplay muted loop playsinline preload="auto" aria-label="AI-generated video showing the Skynet study assistant concept">
+      <source id="heroSource" src="hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero-fallback" aria-hidden="true"></div>
+    <div class="hero-shade"></div>
+  </div>
+
+  <div class="wrap hero-content">
+    <span class="eyebrow status"><i></i>Online for the MSAIB 2027 cohort</span>
+    <h1>Every lecture. <span class="glow">One conversation.</span></h1>
+    <p class="lead">Skynet answers your ITOM 6216 questions in seconds. It reads the course guide and the slides from Lectures 1 to 5, then tells you which file each answer came from.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-primary" data-open-chat>Ask Skynet now</button>
+      <a class="btn btn-ghost" href="about.html">See how it works &rarr;</a>
+    </div>
+  </div>
+  <div class="scroll-cue">scroll<br>&darr;</div>
+</section>
+
+<!-- ===== STATS STRIP ===== -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stat"><b>5</b><span>lectures covered</span></div>
+    <div class="stat"><b>6</b><span>course files indexed</span></div>
+    <div class="stat"><b>24/7</b><span>no office hours needed</span></div>
+    <div class="stat"><b>Dec 7</b><span>final presentation</span></div>
+  </div>
+</section>
+
+<!-- ===== WHAT TO ASK ===== -->
+<section id="ask">
+  <div class="wrap">
+    <p class="eyebrow reveal">Try it in class tomorrow</p>
+    <h2 class="reveal">Stop digging through six PDFs.</h2>
+    <p class="lead reveal">Due dates live in the syllabus. Concepts live in five slide decks. Skynet pulls both into one answer. Copy any question below and paste it into the chat.</p>
+
+    <div class="grid-3">
+      <article class="card reveal">
+        <span class="tag">LECTURE 4 &middot; AGENTS</span>
+        <h3>Compare the four agentic systems</h3>
+        <p>Get the autonomy and control level for each type, with the trade-off spelled out.</p>
+        <div class="prompt-q">Compare rule-based systems, workflow agents, semi-autonomous agents, and autonomous agents. What is the main trade-off of each?</div>
+      </article>
+      <article class="card reveal">
+        <span class="tag">COURSE GUIDE &middot; FINAL PROJECT</span>
+        <h3>Prep for December 7</h3>
+        <p>Time limit, slide count, demo rules, and the rubric points, all in one reply.</p>
+        <div class="prompt-q">What do I need to prepare for the Final Project Presentation on December 7?</div>
+      </article>
+      <article class="card reveal">
+        <span class="tag">LECTURE 3 &middot; RAG</span>
+        <h3>RAG in plain language</h3>
+        <p>A step-by-step walk through retrieval, augmentation and generation.</p>
+        <div class="prompt-q">Walk me through the four steps of the RAG pipeline in plain language.</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== X-FACTOR: LECTURE FLASHCARDS ===== -->
+<section id="flashcards" class="fc-section">
+  <div class="wrap">
+    <div class="fc-head">
+      <div>
+        <p class="eyebrow reveal">Study mode</p>
+        <h2 class="reveal">Lecture flashcards</h2>
+        <p class="lead reveal">Tap a card to flip it. Mark what you know and Skynet Study keeps your score on this device.</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="fcReset">Reset progress</button>
+    </div>
+
+    <div class="tabs" role="group" aria-label="Filter flashcards by lecture" id="fcTabs"></div>
+
+    <div class="progress"><span id="fcCount">0 / 0 mastered</span><div class="bar"><i id="fcBar"></i></div><span id="fcPos"></span></div>
+
+    <div class="fc-stage">
+      <div class="fc" id="fcCard" tabindex="0" role="button" aria-label="Flashcard. Press Enter to flip.">
+        <div class="fc-face fc-front">
+          <div class="fc-meta"><span id="fcTagF"></span><span id="fcKnownF"></span></div>
+          <h3 id="fcQ"></h3>
+          <div class="fc-hint">tap or press Enter to flip</div>
+        </div>
+        <div class="fc-face fc-back">
+          <div class="fc-meta"><span id="fcTagB"></span><span id="fcKnownB"></span></div>
+          <p id="fcA"></p>
+        </div>
+      </div>
+      <div class="fc-controls">
+        <button class="btn btn-ghost btn-sm" id="fcPrev">&larr; Prev</button>
+        <button class="btn btn-again btn-sm" id="fcAgain">Review again</button>
+        <button class="btn btn-ok btn-sm" id="fcGot">Got it &check;</button>
+        <button class="btn btn-ghost btn-sm" id="fcNext">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BUTTON TO PAGE 2 ===== -->
+<section>
+  <div class="wrap">
+    <div class="cta-band reveal">
+      <div>
+        <p class="eyebrow">Under the hood</p>
+        <h2>How does Skynet know the answer?</h2>
+        <p class="lead">See the retrieval pipeline, what it covers, what it refuses to guess, and what it stores about you.</p>
+      </div>
+      <a class="btn btn-primary" href="about.html">Explore how Skynet works &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER + X-FACTOR DESCRIPTION (under 50 words) ===== -->
+<footer>
+  <div class="wrap">
+    <p class="xfactor"><b>X-Factor: Lecture Flashcards.</b> Twenty-two flip cards cover key ideas from Lectures 1 to 5. Filter by lecture, mark cards as known or review again, and watch the progress bar fill. Progress saves in your browser only, so nothing leaves your device.</p>
+    <p>Skynet Study is a mock business built for ITOM 6216, Generative AI for Business, SMU Mod B 2026. Not affiliated with any company. Chatbot powered by Chatling.</p>
+  </div>
+</footer>
+
+<!-- ===== SKYNET CHAT WIDGET ===== -->
+<button class="chat-fab" id="chatFab" aria-controls="chatPanel" aria-expanded="false"><span class="eye"></span><span class="label">Ask Skynet</span></button>
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="Skynet chatbot">
+  <div class="chat-top">
+    <div><b>Skynet</b><small>Course assistant &middot; Lectures 1 to 5</small></div>
+    <button class="chat-close" id="chatClose" aria-label="Close chat">&times;</button>
+  </div>
+  <iframe id="chatFrame" title="Skynet chatbot" loading="lazy" allow="clipboard-write"></iframe>
+  <div class="chat-foot">Chat not loading? <a id="chatNewTab" target="_blank" rel="noopener">Open Skynet in a new tab</a></div>
+</div>
+
+<script>
+/* ========== A. CHAT WIDGET ========== */
+const SKYNET_URL = "https://share.chatling.ai/s/5qcmKd58CSRomwC"; // public share link, not a secret
+(function chat(){
+  const fab = document.getElementById("chatFab"), panel = document.getElementById("chatPanel"),
+        frame = document.getElementById("chatFrame"), close = document.getElementById("chatClose");
+  document.getElementById("chatNewTab").href = SKYNET_URL;
+  function setOpen(open){
+    if (open && !frame.src) frame.src = SKYNET_URL; // load the bot only when first opened
+    panel.classList.toggle("open", open);
+    fab.setAttribute("aria-expanded", open);
+  }
+  fab.addEventListener("click", () => setOpen(!panel.classList.contains("open")));
+  close.addEventListener("click", () => setOpen(false));
+  document.querySelectorAll("[data-open-chat]").forEach(b => b.addEventListener("click", () => setOpen(true)));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") setOpen(false); });
+})();
+
+/* ========== B. HERO VIDEO: force autoplay, fall back if hero.mp4 is missing ========== */
+(function video(){
+  const hero = document.getElementById("hero"), v = document.getElementById("heroVideo"),
+        src = document.getElementById("heroSource");
+  const fail = () => hero.classList.add("no-video");
+  src.addEventListener("error", fail);
+  v.addEventListener("error", fail);
+  v.muted = true; // browsers only autoplay muted video
+  const p = v.play(); if (p) p.catch(() => {});
+})();
+
+/* ========== C. NAV BACKGROUND + SCROLL REVEAL ========== */
+const nav = document.getElementById("nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 40), {passive:true});
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }), {threshold:.15});
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+/* ========== D. FLASHCARDS (content from the Lecture 1-5 slides) ========== */
+const CARDS = [
+  {l:1,q:"Predictive AI vs. generative AI: what's the difference?",a:"Predictive AI classifies or forecasts (\"Will this customer buy?\"). Generative AI learns the patterns in data to create new content (\"Write a marketing email\")."},
+  {l:1,q:"Why did deep learning take off in the 2010s?",a:"A \"perfect storm\": GPUs from gaming gave faster processing, social media and e-commerce produced massive datasets, and training methods improved."},
+  {l:1,q:"What did the Transformer (2017) change?",a:"Earlier models processed input one step at a time. Transformers analyze input in parallel, giving faster computation and better performance. Paper: \"Attention Is All You Need.\""},
+  {l:1,q:"What is Moravec's Paradox?",a:"For AI, hard tasks (chess, algebra) are easy and easy tasks (face recognition, language) are hard. It stalled symbolic AI and fed the \"AI Winter.\""},
+  {l:2,q:"Name the 4 core elements of a prompt.",a:"Instruction (the command), Context (background or persona), Input data (what to process), Output indicator (format, structure or tone)."},
+  {l:2,q:"Zero-shot vs. few-shot prompting?",a:"Zero-shot gives no examples and relies on pre-trained knowledge. Few-shot gives 2 to 5 labeled examples so the model copies the pattern (in-context learning)."},
+  {l:2,q:"System prompt vs. user prompt?",a:"The system prompt sets the baseline persona, role and tone for every turn. The user prompt is the specific instruction for one interaction."},
+  {l:2,q:"What are the 3 ways to do Chain-of-Thought prompting?",a:"Few-shot CoT (examples that show the work), guided zero-shot (a list of steps, no examples), open-ended zero-shot (a cue like \"Let's think step by step\")."},
+  {l:3,q:"List the 4 steps of the RAG pipeline.",a:"1) User submits a query. 2) Retrieval searches the knowledge base. 3) Augmentation passes the documents as context to the LLM. 4) The LLM writes a context-aware response."},
+  {l:3,q:"Why do businesses need RAG?",a:"LLM weights are fixed after training, retraining is too expensive, and models hallucinate outside their training data. RAG lets the model fetch what you already have."},
+  {l:3,q:"What is an embedding?",a:"A numerical vector that represents text. Similar meanings sit close together, so \"solar panels\" can match \"renewable energy.\" Example: King − man + woman = Queen."},
+  {l:3,q:"What is hybrid search?",a:"Embedding search captures meaning (finds \"extreme weather\"), while keyword search matches exact terms (\"climate change\"). Using both improves retrieval."},
+  {l:3,q:"What is MCP?",a:"Model Context Protocol: an open standard from Anthropic (2024) that connects AI apps to external systems. Parts: hosts, clients and servers."},
+  {l:4,q:"Chatbot vs. agent in one line?",a:"Chatbots talk. Agents do. Technically, Agents = LLM + Tools + Planning + Memory."},
+  {l:4,q:"Rule-based systems vs. workflow agents?",a:"Rule-based: low autonomy, low control, if-this-then-that, no LLM. Workflow agents: low autonomy, high control; the LLM helps but a human makes the final call."},
+  {l:4,q:"Semi-autonomous vs. autonomous agents: the trade-off?",a:"Semi-autonomous: high ROI on complex automation, but heavy infrastructure. Autonomous: extremely scalable, but high risk and hard to evaluate."},
+  {l:4,q:"Hierarchical vs. flat multi-agent systems?",a:"Hierarchical: an orchestrator \"boss\" delegates subtasks to specialist agents (tight control). Flat: agents work as peers, good for creativity, debate and review."},
+  {l:4,q:"Why do agents need tools?",a:"LLMs are stateless with no real-time access. Tools (APIs, database queries, internal functions) turn an LLM that talks into one that can act."},
+  {l:5,q:"Name the 4 behavioral challenges of LLMs.",a:"Hallucination, adversarial attacks, alignment, and prompt brittleness (unpredictable output from small wording changes)."},
+  {l:5,q:"How does SelfCheckGPT catch hallucinations?",a:"It generates several independent answers to the same prompt and measures how consistent they are. No external database needed (zero-resource)."},
+  {l:5,q:"What is PEFT?",a:"Parameter-Efficient Fine-Tuning: updating under 1% of a model's parameters using adapters, prefix-tuning or LoRA."},
+  {l:5,q:"What is the evaluation trio?",a:"Input (prompt plus context), Expected (what should happen, per the rubric), and Actual (what the system really does, including tools and reasoning)."}
+];
+(function flashcards(){
+  const KEY = "skynet-study-flashcards-v1";
+  let known = new Set();
+  try { known = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch(e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...known])); } catch(e) {} };
+
+  let filter = "all", pos = 0;
+  const $ = id => document.getElementById(id);
+  const card = $("fcCard"), tabs = $("fcTabs");
+  const deck = () => CARDS.map((c,i) => ({...c,id:i})).filter(c => filter === "all" || c.l === filter);
+
+  ["all",1,2,3,4,5].forEach(f => {
+    const b = document.createElement("button");
+    b.className = "tab"; b.textContent = f === "all" ? "All lectures" : "Lecture " + f;
+    b.setAttribute("aria-pressed", f === filter);
+    b.onclick = () => { filter = f; pos = 0; tabs.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-pressed", t === b)); render(); };
+    tabs.appendChild(b);
+  });
+
+  function render(){
+    const d = deck(), c = d[pos];
+    card.classList.remove("flipped");
+    const tag = "LECTURE " + c.l, k = known.has(c.id) ? "✓ mastered" : "";
+    $("fcTagF").textContent = $("fcTagB").textContent = tag;
+    $("fcKnownF").textContent = $("fcKnownB").textContent = k;
+    $("fcKnownF").className = $("fcKnownB").className = "known";
+    // wait for the flip-back animation before swapping text, so the answer never flashes
+    setTimeout(() => { $("fcQ").textContent = c.q; $("fcA").textContent = c.a; }, card.dataset.ready ? 150 : 0);
+    card.dataset.ready = 1;
+    const m = d.filter(x => known.has(x.id)).length;
+    $("fcCount").textContent = m + " / " + d.length + " mastered";
+    $("fcBar").style.width = (d.length ? m / d.length * 100 : 0) + "%";
+    $("fcPos").textContent = "card " + (pos + 1) + " of " + d.length;
+  }
+  const step = n => { const d = deck(); pos = (pos + n + d.length) % d.length; render(); };
+  const flip = () => card.classList.toggle("flipped");
+  card.addEventListener("click", flip);
+  card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+  $("fcPrev").onclick = () => step(-1);
+  $("fcNext").onclick = () => step(1);
+  $("fcGot").onclick = () => { known.add(deck()[pos].id); save(); step(1); };
+  $("fcAgain").onclick = () => { known.delete(deck()[pos].id); save(); step(1); };
+  $("fcReset").onclick = () => { known.clear(); save(); pos = 0; render(); };
+  render();
+})();
+</script>
+</body>
+</html>
